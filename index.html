@@ -51,10 +51,12 @@
 					</div>
 				</div>
 				<div class="leaderboard">
-				    <h2>Leaderboard</h2>
-				    <p></p>
-				    <ul class="top-scores">
-				    </ul>
+				    <table id="highscores">
+				    	<tr>
+				    		<td>Name</td>
+				    		<td>Score</td>
+				    	</tr>
+				    </table>
 				</div>
 			</div>	
 
@@ -64,11 +66,28 @@
   const moles = document.querySelectorAll('.mole');
   const timerDisplay = document.querySelector('.timer');
   const levels = document.querySelectorAll('[data-time]');
+  var hst = document.getElementById("highscores");
   let lastHole;
   let levelValue = 400;
   let timeUp = false;
   let score = 0;
   let countdown;
+
+  function leaderboard(playerName){
+	  var highscores = [
+	  		{name: `${playerName}`, score: `${score}`},
+	  ];
+
+	  localStorage.setItem("highscores", JSON.stringify(highscores));
+
+	  var retrievedScores = JSON.parse(localStorage.getItem("highscores"));
+
+	  for (var i = 0; i < retrievedScores.length; i++){
+	  	hst.innerHTML += "<tr><td>" + retrievedScores[i].name + "</td><td>" +  retrievedScores[i].score + "</td></tr>";
+	  }
+  }
+
+
   
   function getTimeValue() {
   	levelValue = parseInt(this.dataset.time);
@@ -82,8 +101,7 @@
     const idx = Math.floor(Math.random() * holes.length);
     const hole = holes[idx];
     if (hole === lastHole) {
-      console.log('Ah nah thats the same one bud');
-      return randomHole(holes);
+          return randomHole(holes);
     }
     lastHole = hole;
     return hole;
@@ -96,7 +114,10 @@
     setTimeout(() => {
       hole.classList.remove('up');
       if (!timeUp) peep();
+      if(timeUp) var playerName = prompt("Enter your Name");
+      if(timeUp) leaderboard(playerName);
     }, time);
+
   }
 
   function startGame() {
@@ -106,7 +127,7 @@
     timeUp = false;
     score = 0;
     peep();
-    setTimeout(() => timeUp = true, 10000)
+    setTimeout(() => timeUp = true, 10000);
   }
 
   function timer(seconds) {
