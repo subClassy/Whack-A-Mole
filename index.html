@@ -1,172 +1,211 @@
-	<!DOCTYPE html>
-	<html>
-	<head>
+<!DOCTYPE html>
+<html>
+<head>
 	<meta charset="utf-8"> 
 	<title>Whack A Mole!</title>
 	<link href='https://fonts.googleapis.com/css?family=Amatic+SC:400,700' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" href="style.css">
-	</head>
-	<body>
-			<div class="top">
-				<div class="top_content">
-					<div class="timer">
-						<p style="margin-top: 10px">Time: 00:00</p>
-					</div>
-					<div class="title">
-					Whack A Mole!
-					</div>
-					<div class="score">
-					Score: 0
-					</div>
-				</div>	
+</head>
+<body>
+	<div class="top">
+		<div class="top_content">
+			<div class="timer">
+				<p style="margin-top: 10px">Time: 00:00</p>
 			</div>
-			<div class="bottom">
-				<div class="level">
-					<ul style="list-style-type:none">
-						<p class="diff-level">Level:</p>
-						<li><button data-time="1000" class="level-button">Easy</button></li>
-						<li><button data-time="700" class="level-button">Medium</button></li>
-						<li><button data-time="400" class="level-button">Difficult</button></li>
-					</ul>
-					<button onClick="startGame()">Start!</button>
-				</div>
-				<div class="game">
-					<div class="hole hole1">
-						  <div class="mole"></div>
-					</div>
-					<div class="hole hole2">
-						  <div class="mole"></div>
-					</div>
-					<div class="hole hole3">
-						  <div class="mole"></div>
-					</div>
-					<div class="hole hole4">
-						  <div class="mole"></div>
-					</div>
-					<div class="hole hole5">
-						  <div class="mole"></div>
-					</div>
-					<div class="hole hole6">
-						  <div class="mole"></div>
-					</div>
-				</div>
-				<div class="leaderboard">
-				    <table id="highscores">
-				    	<tr>
-				    		<td>Name</td>
-				    		<td>Score</td>
-				    	</tr>
-				    </table>
-				</div>
-			</div>	
+			<div class="title">
+				Whack A Mole!
+			</div>
+			<div class="score">
+				Score: 0
+			</div>
+		</div>	
+	</div>
+	<div class="bottom">
+		<div class="level">
+			<ul style="list-style-type:none">
+				<p class="diff-level">Level:</p>
+				<li><button data-time="1000" data-level="Easy" class="level-button">Easy</button></li>
+				<li><button data-time="700" data-level="Medium" class="level-button">Medium</button></li>
+				<li><button data-time="400" data-level="Diificult" class="level-button">Difficult</button></li>
+			</ul>
+			<button onClick="startGame()">Start!</button>
+		</div>
+		<div class="game">
+			<div class="hole hole1">
+				<div class="mole"></div>
+			</div>
+			<div class="hole hole2">
+				<div class="mole"></div>
+			</div>
+			<div class="hole hole3">
+				<div class="mole"></div>
+			</div>
+			<div class="hole hole4">
+				<div class="mole"></div>
+			</div>
+			<div class="hole hole5">
+				<div class="mole"></div>
+			</div>
+			<div class="hole hole6">
+				<div class="mole"></div>
+			</div>
+		</div>
+		<div class="leaderboard">
+			<table id="highscores">
+				<tr>
+					<td>Name</td>
+					<td>Score</td>
+					<td>Level</td>
+				</tr>
+			</table>
+		</div>
+	</div>	
 
-			<script>
-  const holes = document.querySelectorAll('.hole');
-  const scoreBoard = document.querySelector('.score');
-  const moles = document.querySelectorAll('.mole');
-  const timerDisplay = document.querySelector('.timer');
-  const levels = document.querySelectorAll('[data-time]');
-  var hst = document.getElementById("highscores");
-  let lastHole;
-  let levelValue = 400;
-  let timeUp = false;
-  let score = 0;
-  let countdown;
-
-  function leaderboard(playerName){
-	  var highscores = [
-	  		{name: `${playerName}`, score: `${score}`},
-	  ];
-
-	  localStorage.setItem("highscores", JSON.stringify(highscores));
-
-	  var retrievedScores = JSON.parse(localStorage.getItem("highscores"));
-
-	  for (var i = 0; i < retrievedScores.length; i++){
-	  	hst.innerHTML += "<tr><td>" + retrievedScores[i].name + "</td><td>" +  retrievedScores[i].score + "</td></tr>";
-	  }
-  }
+	<script>
+		const holes = document.querySelectorAll('.hole');
+		const scoreBoard = document.querySelector('.score');
+		const moles = document.querySelectorAll('.mole');
+		const timerDisplay = document.querySelector('.timer');
+		const levels = document.querySelectorAll('[data-time]');
+		var hst = document.getElementById("highscores");
+		const lists = JSON.parse(localStorage.getItem('lists')) || [];
+		var retrievedScores = JSON.parse(localStorage.getItem("lists"));
+		var len;
+		if(retrievedScores != null) {
+			bubbleSort(retrievedScores);
+			for (var i = retrievedScores.length-1; i >= retrievedScores.length-10 && i >= 0; i--) {
+				hst.innerHTML += "<tr><td>" + retrievedScores[i][0].name + "</td><td>" + retrievedScores[i][0].score + "</td><td>" + retrievedScores[i][0].level + "</td></tr>";
+			}	
+		}
+		let diffValue = "Easy";
+		let lastHole;
+		let levelValue = 1000;
+		let timeUp = false;
+		let score = 0;
+		let countdown;
 
 
-  
-  function getTimeValue() {
-  	levelValue = parseInt(this.dataset.time);
-  }
 
-  function randomTime(min, max) {
-    return Math.round(Math.random() * (max - min) + min);
-  }
+		function bubbleSort(retrievedScores) {
+			var swapped;
+			do {
+				swapped = false;
+				for (var i=0; i < retrievedScores.length-1; i++) {
+					if (parseInt(retrievedScores[i][0].score) > parseInt(retrievedScores[i+1][0].score)) {
+						var temp1 = retrievedScores[i][0].score;
+						retrievedScores[i][0].score = retrievedScores[i+1][0].score;
+						retrievedScores[i+1][0].score = temp1;
+						var temp2 = retrievedScores[i][0].name;
+						retrievedScores[i][0].name = retrievedScores[i+1][0].name;
+						retrievedScores[i+1][0].name = temp2;
+						swapped = true;
+						var temp3 = retrievedScores[i][0].level;
+						retrievedScores[i][0].level = retrievedScores[i+1][0].level;
+						retrievedScores[i+1][0].level = temp3;
+						swapped = true;
+					}
+				}
+			} while (swapped);
 
-  function randomHole(holes) {
-    const idx = Math.floor(Math.random() * holes.length);
-    const hole = holes[idx];
-    if (hole === lastHole) {
-          return randomHole(holes);
-    }
-    lastHole = hole;
-    return hole;
-  }
+			return retrievedScores;
+		}
 
-  function peep() {
-    const time = randomTime(200, `${levelValue}`);
-    const hole = randomHole(holes);
-    hole.classList.add('up');
-    setTimeout(() => {
-      hole.classList.remove('up');
-      if (!timeUp) peep();
-      if(timeUp) var playerName = prompt("Enter your Name");
-      if(timeUp) leaderboard(playerName);
-    }, time);
+		function leaderboard(playerName){
+			var highscores = [
+			{name: `${playerName}`, score: `${score}`, level: `${diffValue}`},
+			];
 
-  }
+			lists.push(highscores);
+			localStorage.setItem("lists", JSON.stringify(lists));
+			var retrievedScores = JSON.parse(localStorage.getItem("lists"));
+			console.log(retrievedScores);
+			bubbleSort(retrievedScores);
+			for (var i = 1; i <= 1; i++){
+				hst.innerHTML += "<tr><td>" + `${playerName}` + "</td><td>" +  `${score}` + "</td><td>" + `${diffValue}` + "</td></tr>";
+			}
+		}
 
-  function startGame() {
-  	seconds = 10;
-  	timer(seconds);
-    scoreBoard.textContent = `Score:0`;
-    timeUp = false;
-    score = 0;
-    peep();
-    setTimeout(() => timeUp = true, 10000);
-  }
 
-  function timer(seconds) {
-  	clearInterval(countdown);
 
-  	const now = Date.now();
-  	const then = now + seconds * 1000;
-  	timeLeft(seconds);
+		function getTimeValue() {
+			levelValue = parseInt(this.dataset.time);
+			diffValue = this.dataset.level;
+		}
 
-  	countdown = setInterval(() => {
-  		const secondsLeft = Math.round((then - Date.now()) / 1000);
-  		if(secondsLeft < 0) {
-  			clearInterval(countdown);
-  			return;
-  		}
+		function randomTime(min, max) {
+			return Math.round(Math.random() * (max - min) + min);
+		}
 
-  		timeLeft(secondsLeft);
-  	}, 1000);
-  }
+		function randomHole(holes) {
+			const idx = Math.floor(Math.random() * holes.length);
+			const hole = holes[idx];
+			if (hole === lastHole) {
+				return randomHole(holes);
+			}
+			lastHole = hole;
+			return hole;
+		}
 
-  function timeLeft(seconds) {
-  	const minutes = Math.floor(seconds / 60);
-  	const remainderSeconds = seconds % 60;
-  	const display = `${minutes}:${remainderSeconds < 10 ? '0' : '' }${remainderSeconds}`;
-  	timerDisplay.textContent = `Time: ${display}`;
-  }
+		function peep() {
+			const time = randomTime(200, `${levelValue}`);
+			const hole = randomHole(holes);
+			hole.classList.add('up');
+			setTimeout(() => {
+				hole.classList.remove('up');
+				if (!timeUp) peep();
+				if(timeUp) var playerName = prompt("Enter your Name");
+				if(timeUp) leaderboard(playerName);
+			}, time);
 
-  function bonk(e) {
-    if(!e.isTrusted) return; // cheater!
-    score++;
-    this.parentNode.classList.remove('up');
-    scoreBoard.textContent = `Score:${score}`;
-  }
+		}
 
-  levels.forEach(level => level.addEventListener('click', getTimeValue));
-  moles.forEach(mole => mole.addEventListener('click', bonk));
-  
+		function startGame() {
+			seconds = 10;
+			timer(seconds);
+			scoreBoard.textContent = `Score:0`;
+			timeUp = false;
+			score = 0;
+			peep();
+			setTimeout(() => timeUp = true, 10000);
+		}
 
-</script>
-		
-	</body>
-	</html>
+		function timer(seconds) {
+			clearInterval(countdown);
+
+			const now = Date.now();
+			const then = now + seconds * 1000;
+			timeLeft(seconds);
+
+			countdown = setInterval(() => {
+				const secondsLeft = Math.round((then - Date.now()) / 1000);
+				if(secondsLeft < 0) {
+					clearInterval(countdown);
+					return;
+				}
+
+				timeLeft(secondsLeft);
+			}, 1000);
+		}
+
+		function timeLeft(seconds) {
+			const minutes = Math.floor(seconds / 60);
+			const remainderSeconds = seconds % 60;
+			const display = `${minutes}:${remainderSeconds < 10 ? '0' : '' }${remainderSeconds}`;
+			timerDisplay.textContent = `Time: ${display}`;
+		}
+
+		function bonk(e) {
+			if(!e.isTrusted) return; 
+			score++;
+			this.parentNode.classList.remove('up');
+			scoreBoard.textContent = `Score:${score}`;
+		}
+
+		levels.forEach(level => level.addEventListener('click', getTimeValue));
+		moles.forEach(mole => mole.addEventListener('click', bonk));
+
+
+	</script>
+
+</body>
+</html>
