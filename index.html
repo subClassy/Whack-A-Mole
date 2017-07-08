@@ -79,8 +79,9 @@
 		}
 		let diffValue = "Easy";
 		let lastHole;
+		var playerName;
 		let levelValue = 1000;
-		let timeUp = false;
+		let timeUp = true;
 		let score = 0;
 		let countdown;
 
@@ -153,21 +154,27 @@
 			setTimeout(() => {
 				hole.classList.remove('up');
 				if (!timeUp) peep();
-				if(timeUp) var playerName = prompt("Enter your Name");
-				if(timeUp) leaderboard(playerName);
+				if(timeUp) playerName = prompt("Enter your Name");
+				if(timeUp && playerName != null && playerName != "") leaderboard(playerName);
 			}, time);
 
 		}
 
 		function startGame() {
-			seconds = 10;
-			timer(seconds);
-			scoreBoard.textContent = `Score:0`;
-			timeUp = false;
-			score = 0;
-			peep();
-			setTimeout(() => timeUp = true, 10000);
+			if(timeUp){
+				timeUp = false;
+				seconds = 10;
+				timer(seconds);
+				scoreBoard.textContent = `Score:0`;
+				score = 0;
+				peep();
+				setTimeout(() => timeUp = true, 10000);
+			}
+			else {
+				return;
+			}
 		}
+
 
 		function timer(seconds) {
 			clearInterval(countdown);
